@@ -1,22 +1,11 @@
 'use strict';
 
 // * User Inputs
-checkInput('.clear', 'clear');
-checkInput('.backspace', 'backspace');
+handleUserInput('.clear', 'clear');
+handleUserInput('.backspace', 'backspace');
 
-for (let i = 0; i <= 9; i++) checkInput(`.numb--${i}`, i);
-checkInput('.numb--dot', '.');
-
-/* const operatorArr = [
-  { name: 'add', symbol: '+' },
-  { name: 'sub', symbol: '-' },
-  { name: 'multi', symbol: '*', display: '×' },
-  { name: 'divi', symbol: '/', display: '÷' },
-  { name: 'equal', symbol: '=' },
-];
-
-for (let i = 0; i < operatorArr.length; i++)
-checkInput(`.operator--${operatorArr[i].name}`, operatorArr[i].symbol); */
+for (let i = 0; i <= 9; i++) handleUserInput(`.numb--${i}`, i);
+handleUserInput('.numb--dot', '.');
 
 const operatorObj = {
   add: { symbol: '+' },
@@ -27,33 +16,22 @@ const operatorObj = {
 };
 
 for (const key of Object.keys(operatorObj)) {
-  checkInput(`.operator--${key}`, operatorObj[key].symbol);
+  handleUserInput(`.operator--${key}`, operatorObj[key].symbol);
 }
 
 // * Storage
-let storage = [''],
-  currentNum = storage[storage.length - 1];
-
-// * Initialization
-function init() {
-  // storage = [];
-  // display();
-}
-
-// * Calculates the Inputs
-function calc(action) {
-  console.log(...action);
-  // if ((inputs[0] = '')) {
-  // }
-}
+let storage = [''];
+let history = [];
 
 // * Displays User Inputs
-function display() {
-  document.querySelector('.screen').textContent = [
-    ...storage,
-    currentNum,
-  ].join(' ');
-  console.log(currentNum);
+function display(extra) {
+  const screen = document.querySelector('.screen');
+  screen.innerHTML =
+    [...storage].join(' ') + (extra ? `<br />${extra}` : '');
+
+  // Changes Key AC(all clear) to C(clear)
+  document.querySelector('.clear').textContent =
+    storage.length === 1 || !storage[0] === ' ' ? 'AC' : 'C';
 }
 
 function operators(output) {
@@ -61,42 +39,65 @@ function operators(output) {
     if (operatorObj[key].symbol === output) return true;
 }
 
-// Changes Key AC(all clear) to C(clear)
-document.querySelector('.clear').textContent =
-  [...storage].length > 0 ? 'C' : 'AC';
-
 // * Handles user input events and does calculator actions
-function checkInput(className, output) {
-  document.querySelector(className).addEventListener('click', () => {
-    // - Number
-    if (typeof output === 'number' || output === '.') {
-      currentNum += output;
-      display();
-    }
+function handleUserInput(selector, value) {
+  document.querySelector(selector).addEventListener('click', () => {
+    let lastIndex = storage.length - 1;
 
-    // - Operator
-    else if (operators(output)) {
-      storage.push(currentNum, output);
-      // If the Operator is Equal then calculate
-      if (output === '=') calc(storage);
-      else {
-        currentNum = '';
+    switch (true) {
+      // - Number
+      case typeof value === 'number' || value === '.':
+        if (operators(storage[lastIndex])) {
+          storage.push('');
+          lastIndex++;
+        }
+        storage[lastIndex] += value;
         display();
-      }
+        break;
+
+      // - Operator
+      case operators(value):
+        // If value is = then calculates the expression
+        if (value === '=') {
+          try {
+            const expression = storage.join(' ');
+            const answer = eval(expression);
+            display(answer);
+            history.push({
+              storage: storage,
+              expression: expression,
+              answer: answer,
+            });
+            storage = [''];
+          } catch (error) {
+            display('Invalid Input!'); // If the expression is invalid
+          }
+        } else {
+          // If last value is an Operator then replaces
+          if (operators(storage[lastIndex])) storage[lastIndex] = value;
+          else storage.push(value);
+          display();
+        }
+        break;
+
+      // - Backspace
+      case value === 'backspace':
+        // If the last value is an operator then removes it
+        if (operators(storage[lastIndex])) {
+          storage.pop();
+        }
+        //  Else If the last value is a number slices the last number
+        else if (storage[lastIndex])
+          storage[lastIndex] = storage[lastIndex].slice(0, -1);
+
+        display();
+        break;
+
+      // - Clear
+      case value === 'clear':
+        storage = [''];
+        display();
+        break;
     }
-
-    // - Backspace
-    else if (output === 'backspace') {
-      if (storage.length > 0) {
-        const lastValue = storage.length - 1;
-        storage.pop([lastValue]);
-      }
-
-      // else if (currentNum) currentNum = currentNum.slice(0, -1);
-      // display();
-    }
-
-    // - Clear
-    else if (output === 'clear') init();
   });
 }
