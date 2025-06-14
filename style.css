@@ -143,7 +143,7 @@ main {
 
 .screen {
   grid-area: screen;
-  min-height: 12rem;
+  min-height: 15rem;
   border-radius: 7px;
   background-color: var(--screen-100);
   font-size: var(--fs-30);
@@ -160,6 +160,10 @@ main {
   text-align: right;
   word-wrap: break-word;
   white-space: wrap;
+}
+
+.line-2 {
+  font-size: var(--fs-36);
 }
 
 .functions,
@@ -236,7 +240,7 @@ main {
   }
 
   .screen {
-    min-height: 8rem;
+    min-height: 12rem;
     padding: var(--space-12);
   }
 
