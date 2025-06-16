@@ -11,9 +11,12 @@
   </head>
   <body>
     <main class="main">
+      <!-- CALCULATOR -->
       <div class="calculator">
-        <div class="screen"></div>
-
+        <div class="screen">
+          <div class="history-count"></div>
+          <div class="display"></div>
+        </div>
         <div class="functions">
           <div class="btn clear">AC</div>
           <div class="btn backspace">←</div>
@@ -42,12 +45,79 @@
         </div>
       </div>
 
-      <div class="guide" style="display: none">
-        <h1 class="heading--primary">Guide</h1>
-        <p class="ques">How to use this calculator?</p>
-        <p class="ans">Just like any other calculator!</p>
+      <!-- GUIDE -->
+      <div class="guide">
+        <h1 class="heading--primary">Calculator Guide</h1>
 
+        <div class="guide-section">
+          <h2 class="ques">How to use this calculator?</h2>
+          <p class="ans">
+            Just like any other calculator! Click numbers and operators or
+            use your keyboard.
+          </p>
+
+          <h2 class="ques">Keyboard shortcuts:</h2>
+          <ul class="ans">
+            <li>Numbers 0-9 and decimal point (.)</li>
+            <li>Operators: + - * / and Enter (=)</li>
+            <li>Backspace to delete</li>
+            <li>Escape to clear (press twice to clear everything)</li>
+          </ul>
+        </div>
         <div class="btn btn__dev">Dev Mode</div>
+
+        <!-- DEV PANEL -->
+        <div class="dev-panel">
+          <h2>Developer Mode</h2>
+
+          <div class="dev-section">
+            <h3>Current State</h3>
+            <div class="dev-item">
+              <span class="dev-label">Expression:</span>
+              <code class="dev-value storage">[]</code>
+            </div>
+            <div class="dev-item">
+              <span class="dev-label">Input:</span>
+              <code class="dev-value value">None</code>
+            </div>
+            <div class="dev-item">
+              <span class="dev-label">Input Type:</span>
+              <code class="dev-value">None</code>
+            </div>
+            <div class="dev-item">
+              <span class="dev-label">Escape Count:</span>
+              <code class="dev-value escape-count">0</code>
+            </div>
+          </div>
+
+          <div class="dev-section">
+            <h3>Last Calculation</h3>
+            <div class="dev-item">
+              <span class="dev-label">Expression:</span>
+              <code class="dev-value">None</code>
+            </div>
+            <div class="dev-item">
+              <span class="dev-label">Raw Result:</span>
+              <code class="dev-value">None</code>
+            </div>
+            <div class="dev-item">
+              <span class="dev-label">Formatted Result:</span>
+              <code class="dev-value">None</code>
+            </div>
+          </div>
+
+          <div class="dev-section">
+            <h3>History</h3>
+            <div class="dev-item">
+              <span class="dev-label">History Length:</span>
+              <code class="dev-value history-length">0</code>
+            </div>
+            <div class="dev-item">
+              <span class="dev-label">History Data:</span>
+              <div class="dev-value history-list">No history yet</div>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 

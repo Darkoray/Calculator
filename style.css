@@ -153,6 +153,7 @@ main {
   overflow: hidden;
   padding: var(--space-16);
 
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -164,6 +165,15 @@ main {
 
 .line-2 {
   font-size: var(--fs-36);
+}
+
+.history-count {
+  position: absolute;
+  font-size: var(--fs-20);
+  letter-spacing: 2px;
+  inset: 2px auto auto 8px;
+  opacity: 0.6;
+  z-index: 1;
 }
 
 .functions,
