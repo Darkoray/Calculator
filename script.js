@@ -1,5 +1,13 @@
 'use strict';
 
+// * States
+let currentExpr = [''],
+  history = [],
+  escapeCount = 0,
+  inputValue,
+  formattedResult;
+const historyLimit = 100;
+
 // * User Inputs
 handleUserInput('.clear', 'Escape'); //clear key
 handleUserInput('.backspace', 'Backspace'); //backspace key
@@ -17,38 +25,33 @@ const operatorObj = {
 for (const key of Object.keys(operatorObj))
   handleUserInput(`.operator--${key}`, operatorObj[key].action); // operator keys
 
-// * States
-let storage = [''];
-let history = [];
-let escapeCount = 0;
-
 // * Displays User Inputs
 function display(extra) {
-  const displayStorage = function () {
-    const tempStorage = [...storage];
-    for (let i = 0; i < tempStorage.length; i++) {
+  const displayExpr = function () {
+    const tempExpr = [...currentExpr];
+    for (let i = 0; i < tempExpr.length; i++) {
       // Changes operatorObj's action to display
-      for (const key of Object.keys(operatorObj)) {
+      for (const key of Object.keys(operatorObj))
         if (
-          operatorObj[key].action === tempStorage[i] &&
+          operatorObj[key].action === tempExpr[i] &&
           operatorObj[key].display
         )
-          tempStorage[i] = operatorObj[key].display;
-      }
+          tempExpr[i] = operatorObj[key].display;
 
       // Formats numbers
-      if (!isNaN(tempStorage[i]) && tempStorage[i] !== '')
-        tempStorage[i] = Number(tempStorage[i]).toLocaleString();
+      if (!isNaN(tempExpr[i]) && tempExpr[i] !== '')
+        tempExpr[i] = Number(tempExpr[i]).toLocaleString();
     }
-    return tempStorage.join(' ');
+    return tempExpr.join(' ');
   };
 
   if (!isNaN(extra)) extra = extra.toLocaleString(); // Formats numbers
+  formattedResult = extra;
 
   // Displays the expressions and results
   document.querySelector('.display').innerHTML =
     `<div class='line-1' ${extra != null ? "style='opacity:0.7'" : ''}>
-    ${displayStorage()}</div>` +
+    ${displayExpr()}</div>` +
     (extra != null
       ? `<div class='line-2'>
       ${extra}</div>`
@@ -63,7 +66,53 @@ function updateUI() {
 
   // AC and C
   document.querySelector('.clear').textContent =
-    history.length === 0 && storage[0] === '' ? 'AC' : 'C';
+    history.length === 0 && currentExpr[0] === '' ? 'AC' : 'C';
+
+  //- Dev View
+  if (document.querySelector('.btn--dev').classList.contains('active')) {
+    let lastHistory = history[history.length - 1]; // Last history
+    function updateDevPanel(className, content) {
+      document.querySelector(className).innerHTML = content;
+    }
+
+    // Current State
+    updateDevPanel('.current-expr', JSON.stringify(currentExpr) ?? '[]');
+    updateDevPanel('.value', inputValue ?? 'Empty');
+    updateDevPanel(
+      '.value-type',
+      !isNaN(inputValue) || inputValue === '.'
+        ? 'Number'
+        : operators(inputValue)
+        ? 'Operator'
+        : inputValue === 'Backspace' || inputValue === 'Escape'
+        ? 'Function'
+        : 'None'
+    );
+    updateDevPanel('.escape-count', escapeCount ?? '0');
+
+    // Last Calculation
+    updateDevPanel('.expression', lastHistory?.expression ?? 'Empty');
+    updateDevPanel('.raw-result', lastHistory?.answer ?? 'Empty');
+    updateDevPanel('.formatted-result', formattedResult ?? 'Empty');
+
+    // History
+    updateDevPanel('.history-length', history.length ?? '0');
+    updateDevPanel('.history-limit', historyLimit - 1 ?? 'Undefined');
+    updateDevPanel(
+      '.history-data',
+      (() => {
+        if (history.length === 0) return 'No history yet';
+        let historyData = '';
+        for (let i = 0; i < history.length; i++)
+          historyData += `${i + 1}. expression: ${
+            history[i].expression
+          }, answer: ${history[i].answer}${
+            i !== history.length - 1 ? ',' + '<br />' : ''
+          }`;
+        return historyData;
+      })()
+    );
+  }
 }
 
 //* checks if the output is an operator
@@ -74,22 +123,24 @@ function operators(output) {
 
 // # Does calculator actions based on keys
 function processInput(value) {
-  let StrLastIndex = storage.length - 1; // Last index of storage
+  inputValue = value; // Stores value
+  let ExprLastIndex = currentExpr.length - 1; // Last index of currentExpr
   let HstLastIndex = history.length - 1; // Last index of History
 
   switch (true) {
     // - Number
     case typeof value === 'number' || value === '.':
-      if (value === '.' && storage[StrLastIndex].includes('.')) return; //Prevents multiple '.'
+      if (value === '.' && currentExpr[ExprLastIndex].includes('.'))
+        return; //Prevents multiple '.'
       // If the last value is a operator then push an empty value
-      if (operators(storage[StrLastIndex])) {
-        storage.push('');
-        StrLastIndex++;
+      if (operators(currentExpr[ExprLastIndex])) {
+        currentExpr.push('');
+        ExprLastIndex++;
       }
       // If the value is a number following '0' then replace '0'
-      if (storage[StrLastIndex] === '0' && value !== '.')
-        storage[StrLastIndex] = String(value);
-      else storage[StrLastIndex] += value;
+      if (currentExpr[ExprLastIndex] === '0' && value !== '.')
+        currentExpr[ExprLastIndex] = String(value);
+      else currentExpr[ExprLastIndex] += value;
       display();
       break;
 
@@ -98,41 +149,43 @@ function processInput(value) {
       // If value is = then calculates the expression
       if (value === operatorObj.equal.action) {
         try {
-          const expression = storage.join(' ');
+          const expression = currentExpr.join(' ');
           const answer = eval(expression);
           if (answer === undefined) return; // Prevents invalid answer
           history.push({
-            storage: storage,
-            expression: expression,
-            answer: answer,
+            currentExpr,
+            expression,
+            answer,
           });
           display(answer);
-          storage = [''];
+          currentExpr = [''];
         } catch (error) {
           display('Invalid Input!'); // If the expression is invalid
         }
       } else {
         // If last value is an Operator then replaces
-        if (operators(storage[StrLastIndex]))
-          storage[StrLastIndex] = value;
-        else storage.push(value);
+        if (operators(currentExpr[ExprLastIndex]))
+          currentExpr[ExprLastIndex] = value;
+        else currentExpr.push(value);
         display();
       }
       break;
 
     // - Backspace
     case value === 'Backspace':
-      // If history exists return the last expression to storage
-      if (history.length > 0 && storage[0] === '') {
-        storage = history[HstLastIndex].storage;
-        display(history[HstLastIndex].answer);
+      // If history exists return the last expression to currentExpr
+      if (history.length > 0 && currentExpr[0] === '') {
+        currentExpr = history[HstLastIndex].currentExpr;
         history.pop();
       } else {
         // If the last value is an operator then removes it
-        if (operators(storage[StrLastIndex])) storage.pop();
+        if (operators(currentExpr[ExprLastIndex])) currentExpr.pop();
         //  Else If the last value is a number slices the last number
-        else if (storage[StrLastIndex])
-          storage[StrLastIndex] = storage[StrLastIndex].slice(0, -1);
+        else if (currentExpr[ExprLastIndex])
+          currentExpr[ExprLastIndex] = currentExpr[ExprLastIndex].slice(
+            0,
+            -1
+          );
       }
       display();
       break;
@@ -142,18 +195,18 @@ function processInput(value) {
       escapeCount++;
       // If escape count is reached
       if (escapeCount === 2) {
-        storage = [''];
+        currentExpr = [''];
         history = [];
         escapeCount = 0;
         display();
         updateUI();
         return;
       }
-      // If Storage is not empty
-      if (storage[0] !== '') storage = [''];
+      // If currentExpr is not empty
+      if (currentExpr[0] !== '') currentExpr = [''];
       // If history exists
       else if (history.length > 0) {
-        storage = history[HstLastIndex].storage;
+        currentExpr = history[HstLastIndex].currentExpr;
         history.pop();
       }
       display();
@@ -162,11 +215,11 @@ function processInput(value) {
   }
 
   // Removes any empty values
-  if (storage.length > 1)
-    storage = storage.filter((value) => value !== '');
+  if (currentExpr.length > 1)
+    currentExpr = currentExpr.filter((value) => value !== '');
 
   // Limits history
-  if (history.length === 100) history.shift();
+  if (history.length === historyLimit) history.shift();
 
   updateUI();
 }
@@ -183,3 +236,25 @@ function handleUserInput(selector, value) {
     if (String(value) === event.key) processInput(value);
   });
 }
+
+// Guide and Dev View
+for (let i = 0; i < 2; i++) {
+  const btns = [
+    document.querySelector('.btn--guide'),
+    document.querySelector('.btn--dev'),
+  ];
+  const secs = [
+    document.querySelector('.guide'),
+    document.querySelector('.dev-panel'),
+  ];
+
+  const x = i === 0 ? 1 : 0;
+  btns[i].addEventListener('click', () => {
+    secs[i].classList.remove('hidden');
+    secs[x].classList.add('hidden');
+    btns[i].classList.add('active');
+    btns[x].classList.remove('active');
+  });
+}
+
+updateUI();
