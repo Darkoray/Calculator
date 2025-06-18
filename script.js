@@ -104,9 +104,9 @@ function updateUI() {
         if (history.length === 0) return 'No history yet';
         let historyData = '';
         for (let i = 0; i < history.length; i++)
-          historyData += `${i + 1}. expression: ${
+          historyData += `${i + 1}. [ expression: ${
             history[i].expression
-          }, answer: ${history[i].answer}${
+          }, answer: ${history[i].answer} ]${
             i !== history.length - 1 ? ',' + '<br />' : ''
           }`;
         return historyData;

@@ -76,7 +76,6 @@ main {
   justify-content: center;
   align-items: flex-start;
   gap: var(--space-64);
-  padding: var(--space-16);
   margin-block: var(--space-64);
 }
 
@@ -123,14 +122,14 @@ strong {
 
 .ques,
 .heading--dev {
-  font-size: var(--fs-18);
+  font-size: var(--fs-20);
   color: var(--accent-100);
 }
 
 .ans,
 .dev-label,
 .dev-value {
-  font-size: var(--fs-14);
+  font-size: var(--fs-18);
   color: var(--text-100);
 }
 
@@ -162,7 +161,7 @@ strong {
 .heading--btns .btn {
   display: inline-block;
 
-  font-size: var(--fs-20);
+  font-size: var(--fs-24);
   font-weight: 600;
   text-align: center;
   color: var(--accent-100);
@@ -312,6 +311,7 @@ strong {
   justify-content: center;
   flex-wrap: wrap;
   gap: clamp(1rem, 1.5vw, 1.6rem);
+  margin-bottom: var(--space-64);
 }
 .footer__link {
   transition: all 0.2s;

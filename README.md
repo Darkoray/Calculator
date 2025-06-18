@@ -4,7 +4,7 @@ A simple yet functional calculator built using basic HTML, CSS, and JavaScript. 
 
 ## How to Use
 
-Just like any regular calculator.
+Just like any regular calculator!
 
 You can **click** the buttons or use your **keyboard**:
 
@@ -13,7 +13,7 @@ You can **click** the buttons or use your **keyboard**:
 - `Backspace` to delete
 - `Escape` to clear (press twice to clear everything)
 
-There's also a **Dev View** if you're curious to peek inner values.
+There's also a **Dev View** if you're curious to peek inner values
 
 ![screenshot](screenshot.png)
 
